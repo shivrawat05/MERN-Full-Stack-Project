@@ -115,7 +115,9 @@ export function AdminProducts() {
               Add a new product to your inventory
             </SheetDescription>
           </SheetHeader>
-          <div className="grid flex-1 auto-rows-min gap-6 px-4">
+          <div
+            className={`grid flex-1 auto-rows-min gap-6 px-4 ${imageLoadingState ? "blur-sm pointer-events-none" : ""}`}
+          >
             {/* form */}
             <form id="form-rhf-demo" onSubmit={form.handleSubmit(onSubmit)}>
               <FormItem>

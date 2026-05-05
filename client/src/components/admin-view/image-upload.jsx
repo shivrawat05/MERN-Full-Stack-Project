@@ -1,188 +1,163 @@
-// import React, { useState } from "react";
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
+// import { useState } from "react";
+// import axios from "axios";
 
-import { useState } from "react";
-import axios from "axios";
+// const ImageUpload = ({ onImageUpload }) => {
+//   const [selectedLogo, setSelectedLogo] = useState();
+//   const [uploading, setUploading] = useState(false);
+//   const [uploadError, setUploadError] = useState(null);
+//   const [uploadedUrl, setUploadedUrl] = useState(null);
 
-// const ImageUpload = ({ setImageLoadingState, onImageUpload }) => {
-//   const [selectedFiles, setSelectedFiles] = useState([]);
-//   const [previews, setPreviews] = useState([]);
+//   const handleLogoChange = (e) => {
+//     const file = e.target.files[0];
 
-//   const handleFileChange = async (event) => {
-//     const files = Array.from(event.target.files);
-//     setSelectedFiles(files);
-
-//     // Create previews for selected files
-//     const newPreviews = files.map((file) => URL.createObjectURL(file));
-//     setPreviews((prev) => [...prev, ...newPreviews]);
-
-//     // Upload to Cloudinary immediately
-//     const cloudinaryUrls = [];
-
-//     for (const file of files) {
-//       try {
-//         const formData = new FormData();
-//         formData.append("file", file);
-//         formData.append("upload_preset", "your_upload_preset"); // Replace with your Cloudinary preset
-
-//         const response = await fetch(
-//           "https://api.cloudinary.com/v1_1/your_cloud_name/image/upload", // Replace with your cloud name
-//           {
-//             method: "POST",
-//             body: formData,
-//           },
-//         );
-
-//         const result = await response.json();
-
-//         const imageData = {
-//           url: result.secure_url,
-//           name: file.name,
-//           size: file.size,
-//           publicId: result.public_id,
-//         };
-
-//         cloudinaryUrls.push(imageData);
-//         console.log("Cloudinary upload success:", imageData);
-//       } catch (error) {
-//         console.error("Cloudinary upload failed:", error);
-//       }
-//     }
-
-//     if (onImageUpload) {
-//       onImageUpload(cloudinaryUrls);
+//     if (file) {
+//       setSelectedLogo(file);
+//       setUploadError(null);
+//       setUploadedUrl(null);
 //     }
 //   };
 
 //   const handleUpload = async () => {
-//     if (selectedFiles.length === 0) return;
+//     if (!selectedLogo) return;
 
-//     const formData = new FormData();
-//     selectedFiles.forEach((file) => {
-//       formData.append("images", file);
-//     });
+//     setUploading(true);
+//     setUploadError(null);
 
 //     try {
-//       setImageLoadingState(true);
+//       const formData = new FormData();
+//       formData.append("image", selectedLogo);
 
-//       const response = await fetch(
-//         "http://localhost:5000/api/admin/products/upload-image",
+//       const response = await axios.post(
+//         "http://localhost:4000/api/products/upload-image",
+//         formData,
 //         {
-//           method: "POST",
-//           body: formData,
+//           headers: {
+//             "Content-Type": "multipart/form-data",
+//           },
 //         },
 //       );
 
-//       const result = await response.json();
+//       const imageUrl = response.data.url;
+//       setUploadedUrl(imageUrl);
 
-//       // Log image URLs to console
-//       console.log("Uploaded image URLs:", result.imageUrls);
-//       console.log("Upload response:", result);
-
-//       // Pass image URLs to parent component
+//       // Pass the uploaded image URL back to parent component
 //       if (onImageUpload) {
-//         onImageUpload(result.imageUrls);
+//         onImageUpload(imageUrl);
 //       }
-
-//       // Clear selections after upload
-//       setSelectedFiles([]);
-//       setPreviews([]);
 //     } catch (error) {
-//       console.error("Upload failed:", error);
+//       console.error("Upload error:", error);
+//       setUploadError(error.response?.data?.message || "Failed to upload image");
 //     } finally {
-//       setImageLoadingState(false);
+//       setUploading(false);
 //     }
 //   };
 
-//   const removeImage = (index) => {
-//     setPreviews((prev) => prev.filter((_, i) => i !== index));
-//     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
-//   };
-
 //   return (
-//     <div className="space-y-4">
-//       <div>
-//         <Label htmlFor="images">Choose Images</Label>
-//         <div className="flex items-center justify-center w-full">
-//           <Input
-//             id="images"
-//             type="file"
-//             multiple
-//             accept="image/*"
-//             onChange={handleFileChange}
-//             className="hidden"
-//           />
-//           <Button
-//             type="button"
-//             variant="outline"
-//             onClick={() => document.getElementById("images").click()}
-//           >
-//             Choose Images
-//           </Button>
+//     <div>
+//       <h1>Image Upload</h1>
+
+//       <div className="space-y-4">
+//         {/* Image Preview */}
+//         {selectedLogo && (
+//           <div className="flex flex-col items-center space-y-2">
+//             <img
+//               src={URL.createObjectURL(selectedLogo)}
+//               alt="Product image"
+//               className="h-32 w-32 object-cover rounded-lg border border-gray-200"
+//             />
+//             <p className="text-sm text-gray-600">{selectedLogo.name}</p>
+//           </div>
+//         )}
+
+//         {/* File Input */}
+//         <div className="flex flex-col items-center space-y-2">
+//           <label className="cursor-pointer inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+//             <input
+//               type="file"
+//               accept="image/*"
+//               onChange={handleLogoChange}
+//               className="hidden"
+//             />
+//             Choose Product Image
+//           </label>
 //         </div>
+
+//         {/* Upload Button */}
+//         {selectedLogo && (
+//           <div className="flex flex-col items-center space-y-2">
+//             <button
+//               onClick={handleUpload}
+//               disabled={uploading}
+//               className={`px-4 py-2 rounded transition-colors ${
+//                 uploading
+//                   ? "bg-gray-400 cursor-not-allowed"
+//                   : "bg-green-500 hover:bg-green-600 text-white"
+//               }`}
+//             >
+//               {uploading ? "Uploading..." : "Upload Image"}
+//             </button>
+//           </div>
+//         )}
+
+//         {/* Upload Status */}
+//         {uploadedUrl && (
+//           <div className="text-center">
+//             <p className="text-green-600 text-sm">
+//               ✓ Image uploaded successfully!
+//             </p>
+//             <p className="text-xs text-gray-500 break-all">{uploadedUrl}</p>
+//           </div>
+//         )}
+
+//         {/* Error Message */}
+//         {uploadError && (
+//           <div className="text-center">
+//             <p className="text-red-600 text-sm">✗ {uploadError}</p>
+//           </div>
+//         )}
 //       </div>
-
-//       {/* Image Previews */}
-//       {previews.length > 0 && (
-//         <div className="grid grid-cols-4 gap-4">
-//           {previews.map((preview, index) => (
-//             <div key={index} className="relative group">
-//               <img
-//                 src={preview}
-//                 alt={`Preview ${index + 1}`}
-//                 className="h-24 w-full object-cover rounded-lg border border-gray-200"
-//               />
-//               <Button
-//                 type="button"
-//                 variant="destructive"
-//                 size="sm"
-//                 className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-//                 onClick={() => removeImage(index)}
-//               >
-//                 ×
-//               </Button>
-//             </div>
-//           ))}
-//         </div>
-//       )}
-
-//       {/* Upload Button */}
-//       {selectedFiles.length > 0 && (
-//         <div className="flex justify-center mt-4"></div>
-//       )}
 //     </div>
 //   );
 // };
 
 // export default ImageUpload;
 
-const ImageUpload = ({ onImageUpload }) => {
+import { useState } from "react";
+import axios from "axios";
+
+const ImageUpload = ({ onImageUpload, setImageLoadingState }) => {
   const [selectedLogo, setSelectedLogo] = useState();
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
   const [uploadedUrl, setUploadedUrl] = useState(null);
 
-  const handleLogoChange = (e) => {
+  const handleLogoChange = async (e) => {
     const file = e.target.files[0];
 
     if (file) {
       setSelectedLogo(file);
       setUploadError(null);
       setUploadedUrl(null);
+
+      // Automatically upload the image
+      await handleUpload(file);
     }
   };
 
-  const handleUpload = async () => {
-    if (!selectedLogo) return;
+  const handleUpload = async (file) => {
+    if (!file) return;
 
     setUploading(true);
     setUploadError(null);
 
+    // Notify parent component about loading state
+    if (setImageLoadingState) {
+      setImageLoadingState(true);
+    }
+
     try {
       const formData = new FormData();
-      formData.append("image", selectedLogo);
+      formData.append("my_file", file);
 
       const response = await axios.post(
         "http://localhost:4000/api/products/upload-image",
@@ -206,72 +181,71 @@ const ImageUpload = ({ onImageUpload }) => {
       setUploadError(error.response?.data?.message || "Failed to upload image");
     } finally {
       setUploading(false);
+
+      // Notify parent component about loading state
+      if (setImageLoadingState) {
+        setImageLoadingState(false);
+      }
     }
   };
 
   return (
-    <div>
-      <h1>Image Upload</h1>
-
-      <div className="space-y-4">
-        {/* Image Preview */}
-        {selectedLogo && (
-          <div className="flex flex-col items-center space-y-2">
-            <img
-              src={URL.createObjectURL(selectedLogo)}
-              alt="Product image"
-              className="h-32 w-32 object-cover rounded-lg border border-gray-200"
-            />
-            <p className="text-sm text-gray-600">{selectedLogo.name}</p>
+    <div className={uploading ? "relative" : ""}>
+      {uploading && (
+        <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50 rounded-lg">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Uploading image...</p>
           </div>
-        )}
-
-        {/* File Input */}
-        <div className="flex flex-col items-center space-y-2">
-          <label className="cursor-pointer inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleLogoChange}
-              className="hidden"
-            />
-            Choose Product Image
-          </label>
         </div>
+      )}
 
-        {/* Upload Button */}
-        {selectedLogo && (
+      <div className={uploading ? "blur-sm pointer-events-none" : ""}>
+        <h1>Image Upload</h1>
+
+        <div className="space-y-4">
+          {/* Image Preview */}
+          {selectedLogo && (
+            <div className="flex flex-col items-center space-y-2">
+              <img
+                src={URL.createObjectURL(selectedLogo)}
+                alt="Product image"
+                className="h-32 w-32 object-cover rounded-lg border border-gray-200"
+              />
+              <p className="text-sm text-gray-600">{selectedLogo.name}</p>
+            </div>
+          )}
+
+          {/* File Input */}
           <div className="flex flex-col items-center space-y-2">
-            <button
-              onClick={handleUpload}
-              disabled={uploading}
-              className={`px-4 py-2 rounded transition-colors ${
-                uploading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-green-500 hover:bg-green-600 text-white"
-              }`}
-            >
-              {uploading ? "Uploading..." : "Upload Image"}
-            </button>
+            <label className="cursor-pointer inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleLogoChange}
+                className="hidden"
+              />
+              Choose Product Image
+            </label>
           </div>
-        )}
 
-        {/* Upload Status */}
-        {uploadedUrl && (
-          <div className="text-center">
-            <p className="text-green-600 text-sm">
-              ✓ Image uploaded successfully!
-            </p>
-            <p className="text-xs text-gray-500 break-all">{uploadedUrl}</p>
-          </div>
-        )}
+          {/* Upload Status */}
+          {uploadedUrl && (
+            <div className="text-center">
+              <p className="text-green-600 text-sm">
+                ✓ Image uploaded successfully!
+              </p>
+              <p className="text-xs text-gray-500 break-all">{uploadedUrl}</p>
+            </div>
+          )}
 
-        {/* Error Message */}
-        {uploadError && (
-          <div className="text-center">
-            <p className="text-red-600 text-sm">✗ {uploadError}</p>
-          </div>
-        )}
+          {/* Error Message */}
+          {uploadError && (
+            <div className="text-center">
+              <p className="text-red-600 text-sm">✗ {uploadError}</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
