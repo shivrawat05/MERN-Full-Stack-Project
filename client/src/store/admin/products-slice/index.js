@@ -71,6 +71,14 @@ const AdminProducSlice = createSlice({
       })
       .addCase(fetchAllProducts.rejected, (state) => {
         state.isLoading = false;
+        state.productList = [];
+      })
+      .addCase(editProduct.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(editProduct.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.productList = action.payload.data;
       });
   },
 });

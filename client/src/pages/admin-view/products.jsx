@@ -38,6 +38,7 @@ import { Label } from "@radix-ui/react-label";
 import React, { Fragment, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addNewProduct } from "@/store/admin/products-slice";
+import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
   title: z
@@ -68,34 +69,38 @@ export function AdminProducts() {
   });
 
   const [imageLoadingState, setImageLoadingState] = useState(false);
+  const [uploadedUrl, setUploadedUrl] = useState("");
+  const [imageFile, setImageFile] = useState(null);
 
   const dispatch = useDispatch();
   const { productList } = useSelector((state) => state.adminProducts);
+  const { toast } = useToast();
 
   const handleImageUpload = (image) => {
     console.log("Image uploaded:", image);
+    setUploadedUrl(image);
   };
 
-  const formData = {
-    title: "",
-    description: "",
-    category: "",
-    brand: "",
-    salesPrice: "",
-    totalStock: "",
+  const onSubmit = (data) => {
+    console.log("Form data:", data);
+    const productData = {
+      ...data,
+      image: uploadedUrl,
+      price: data.salesPrice, // Map salesPrice to price for backend
+    };
+
+    dispatch(addNewProduct(productData)).then((result) => {
+      console.log("Product added successfully", result);
+      if (result?.payload?.success) {
+        setImageFile(null);
+        setUploadedUrl("");
+        form.reset();
+        toast({
+          title: "Product added successfully",
+        });
+      }
+    });
   };
-  const onSubmit = () => {
-    console.log("Form formData:", formData);
-    dispatch(addNewProduct(formData));
-  };
-  console.log(
-    formData.title,
-    formData.description,
-    formData.category,
-    formData.brand,
-    formData.salesPrice,
-    formData.totalStock,
-  );
 
   console.log("ProductList", productList);
 

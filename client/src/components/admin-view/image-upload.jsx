@@ -122,6 +122,7 @@
 
 // export default ImageUpload;
 
+//II
 import { useState } from "react";
 import axios from "axios";
 
@@ -160,7 +161,7 @@ const ImageUpload = ({ onImageUpload, setImageLoadingState }) => {
       formData.append("my_file", file);
 
       const response = await axios.post(
-        "http://localhost:4000/api/products/upload-image",
+        "http://localhost:5000/api/admin/products/upload-image",
         formData,
         {
           headers: {
@@ -169,7 +170,7 @@ const ImageUpload = ({ onImageUpload, setImageLoadingState }) => {
         },
       );
 
-      const imageUrl = response.data.url;
+      const imageUrl = response.data.result.url;
       setUploadedUrl(imageUrl);
 
       // Pass the uploaded image URL back to parent component
@@ -200,7 +201,7 @@ const ImageUpload = ({ onImageUpload, setImageLoadingState }) => {
         </div>
       )}
 
-      <div className={uploading ? "blur-sm pointer-events-none" : ""}>
+      <div>
         <h1>Image Upload</h1>
 
         <div className="space-y-4">
