@@ -66,14 +66,16 @@ const addProduct = async (req, res) => {
 //fetch all products
 
 const fetchAllProducts = async (req, res) => {
+  console.log("fetchAllProducts called");
   try {
     const listOfProducts = await Product.find({});
+    console.log("Products found:", listOfProducts);
     res.status(200).json({
       success: true,
       data: listOfProducts,
     });
   } catch (e) {
-    console.log(e);
+    console.log("Error in fetchAllProducts:", e);
     res.status(500).json({
       success: false,
       message: "Error occured",

@@ -5,6 +5,7 @@ cloudinary.config({
   cloud_name: "shivang",
   api_key: "795116173165928",
   api_secret: "AAKW-1KA6huFqMYHI659fzVVCM4",
+  secure: true,
 });
 
 const storage = new multer.memoryStorage();
