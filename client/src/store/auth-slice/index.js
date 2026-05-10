@@ -40,6 +40,7 @@ export const checkAuth = createAsyncThunk("/auth/check", async () => {
   );
   return response.data;
 });
+
 // When you need it
 
 // Use withCredentials: true when:
@@ -50,9 +51,19 @@ export const checkAuth = createAsyncThunk("/auth/check", async () => {
 // When you don’t need it
 // If you're using JWT in headers (Authorization: Bearer ...) instead of cookies
 
+export const logoutUser = createAsyncThunk("/auth/logout", async () => {
+  const response = await axios.post(
+    "http://localhost:5000/api/auth/logout",
+    {},
+    {
+      withCredentials: true,
+    },
+  );
+  return response.data;
+});
 const initialState = {
   isAuthenticated: false,
-  isLoading: false,
+  isLoading: true,
   user: null,
 };
 
@@ -88,21 +99,29 @@ const authSlice = createSlice({
         state.user = null;
         state.isAuthenticated = false;
       })
+      .addCase(checkAuth.pending, (state) => {
+        state.isLoading = true; // ← add this case
+      })
       .addCase(checkAuth.fulfilled, (state, action) => {
         state.isLoading = false;
         state.user = action.payload.success ? action.payload.user : null;
         state.isAuthenticated = action.payload.success;
       })
-      .addCase(checkAuth.rejected, (state, action) => {
+      .addCase(checkAuth.rejected, (state) => {
+        state.isLoading = false;
+        state.user = null;
+        state.isAuthenticated = false;
+      })
+      // .addCase(logoutUser.fulfilled, (state, action) => {
+      //   state.isLoading = false;
+      //   state.user = null;
+      //   state.isAuthenticated = false;
+      // });
+      .addCase(logoutUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.user = null;
         state.isAuthenticated = false;
       });
-    // .addCase(logoutUser.fulfilled, (state, action) => {
-    //   state.isLoading = false;
-    //   state.user = null;
-    //   state.isAuthenticated = false;
-    // });
   },
 });
 

@@ -12,7 +12,12 @@ import { useSelector, useDispatch } from "react-redux";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { addNewProduct, fetchAllProducts } from "@/store/admin/products-slice";
+import {
+  addNewProduct,
+  deleteProduct,
+  editProduct,
+  fetchAllProducts,
+} from "@/store/admin/products-slice";
 import { toast } from "sonner";
 import AdminProductTile from "./product-tile";
 
@@ -82,28 +87,62 @@ const AdminProducts = () => {
     setIsSheetOpen(true);
   };
 
+  const handleDelete = (id) => {
+    console.log("Delete product", id);
+
+    dispatch(deleteProduct(id)).then((result) => {
+      if (result.payload?.success) {
+        dispatch(fetchAllProducts());
+        toast.success("Product deleted successfully");
+      } else {
+        toast.error("Failed to delete product");
+      }
+    });
+  };
+
   const onSubmit = (data) => {
     const productData = {
       ...data,
       image: imageUrl,
     };
 
-    dispatch(addNewProduct(productData))
-      .then((result) => {
-        if (result.payload?.success) {
-          dispatch(fetchAllProducts());
-          setIsSheetOpen(false); // ✅ fixed: was setOpenCreateProductsDialog
-          setImageUrl("");
-          reset();
-          toast.success("Product added successfully");
-        } else {
-          toast.error("Failed to add product");
-        }
-      })
-      .catch((error) => {
-        console.error("Error adding product:", error);
-        toast.error("Something went wrong");
-      });
+    if (currentEditedId) {
+      // Edit existing product
+      dispatch(editProduct({ id: currentEditedId, formData: productData }))
+        .then((result) => {
+          if (result.payload?.success) {
+            dispatch(fetchAllProducts());
+            setIsSheetOpen(false);
+            setImageUrl("");
+            reset();
+            toast.success("Product updated successfully");
+          } else {
+            toast.error("Failed to update product");
+          }
+        })
+        .catch((error) => {
+          console.error("Error updating product:", error);
+          toast.error("Something went wrong");
+        });
+    } else {
+      // Add new product
+      dispatch(addNewProduct(productData))
+        .then((result) => {
+          if (result.payload?.success) {
+            dispatch(fetchAllProducts());
+            setIsSheetOpen(false);
+            setImageUrl("");
+            reset();
+            toast.success("Product added successfully");
+          } else {
+            toast.error("Failed to add product");
+          }
+        })
+        .catch((error) => {
+          console.error("Error adding product:", error);
+          toast.error("Something went wrong");
+        });
+    }
   };
 
   useEffect(() => {
@@ -127,6 +166,7 @@ const AdminProducts = () => {
               key={productItem._id}
               product={productItem}
               handleEdit={handleEdit}
+              handleDelete={handleDelete}
             />
           ))
         ) : (
