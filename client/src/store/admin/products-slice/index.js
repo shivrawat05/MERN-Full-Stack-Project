@@ -5,7 +5,7 @@ export const addNewProduct = createAsyncThunk(
   "/products/addnewproduct",
   async (formData) => {
     const result = await axios.post(
-      "http://localhost:4000/api/products/add",
+      "http://localhost:5000/api/admin/products/add",
       formData,
       {
         headers: {
@@ -20,7 +20,10 @@ export const addNewProduct = createAsyncThunk(
 export const fetchAllProducts = createAsyncThunk(
   "/products/fetchall",
   async () => {
-    const result = await axios.get("http://localhost:4000/api/products/get");
+    const result = await axios.get(
+      "http://localhost:5000/api/admin/products/get",
+    );
+    console.log("API response:", result?.data);
     return result?.data;
   },
 );
@@ -29,7 +32,7 @@ export const editProduct = createAsyncThunk(
   "/products/editproduct",
   async ({ id, formData }) => {
     const result = await axios.put(
-      `http://localhost:4000/api/products/edit/${id}`,
+      `http://localhost:5000/api/admin/products/edit/${id}`,
       formData,
       {
         headers: {
@@ -45,7 +48,7 @@ export const deleteProduct = createAsyncThunk(
   "/products/deleteproduct",
   async (id) => {
     const result = await axios.delete(
-      `http://localhost:4000/api/products/delete/${id}`,
+      `http://localhost:5000/api/admin/products/delete/${id}`,
     );
     return result?.data;
   },

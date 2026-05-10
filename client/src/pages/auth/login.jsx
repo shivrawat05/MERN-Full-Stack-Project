@@ -1,21 +1,12 @@
-import CommonForm from "@/components/common/form";
-import { registerFormControls } from "@/config";
+import { fetchAllProducts } from "@/store/admin/products-slice";
 import { loginUser } from "@/store/auth-slice";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
-
-const initialState = {
-  email: "",
-  password: "",
-};
+import { toast } from "sonner";
 
 const AuthLogin = () => {
-  const { toast } = useToast();
-
   const dispatch = useDispatch();
-  // const [formData, setFormData] = useState(initialState);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const formDta = {
@@ -26,10 +17,7 @@ const AuthLogin = () => {
     event.preventDefault();
     dispatch(loginUser(formDta)).then((data) => {
       if (data?.payload?.success) {
-        toast({
-          title: data?.payload?.message,
-          variant: "destructive",
-        });
+        toast.error(data?.payload?.message);
       }
     });
   }
@@ -51,14 +39,6 @@ const AuthLogin = () => {
           </Link>
         </p>
       </div>
-      {/* <CommonForm
-        formControls={registerFormControls}
-        buttonText={"Sign Up"}
-        formData={formData}
-        setFormData={setFormData}
-        onSubmit={onSubmit}
-      />
-       */}
 
       <form onSubmit={onSubmit}>
         <div>
