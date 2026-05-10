@@ -5,6 +5,8 @@ const cors = require("cors");
 const authRouter = require("./routes/auth/auth-routes");
 const adminProductsRouter = require("./routes/admin/products-routes");
 
+const shopProductsRouter = require("./routes/shop/products-routes");
+
 mongoose.connect(
   "mongodb+srv://shivrawat:Rawat2002@cluster0.p2nx0ve.mongodb.net",
 );
@@ -32,5 +34,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRouter);
 app.use("/api/admin/products", adminProductsRouter);
+
+app.use("/api/shop/products", shopProductsRouter);
 
 app.listen(PORT, () => console.log(`Server is now running on port ${PORT}`));
