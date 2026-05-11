@@ -1,6 +1,5 @@
 import axios from "axios";
-
-const { createSlice, createAsyncThunk } = require("@reduxjs/toolkit");
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 export const fetchAllFilteredProducts = createAsyncThunk(
   "shoppingProducts/fetchAllFilteredProducts",
