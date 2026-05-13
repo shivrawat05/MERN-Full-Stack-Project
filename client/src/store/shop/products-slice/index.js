@@ -4,7 +4,9 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 export const fetchAllFilteredProducts = createAsyncThunk(
   "shoppingProducts/fetchAllFilteredProducts",
   async () => {
-    const response = await axios.get("http://localhost:5000/api/products/get");
+    const response = await axios.get(
+      "http://localhost:5000/api/shop/products/get",
+    );
     return response.data;
   },
 );
@@ -23,7 +25,7 @@ const shoppingProductSlice = createSlice({
     });
     builder.addCase(fetchAllFilteredProducts.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.productList = action.payload;
+      state.productList = action.payload.data;
       console.log(action.payload);
     });
     builder.addCase(fetchAllFilteredProducts.rejected, (state) => {
