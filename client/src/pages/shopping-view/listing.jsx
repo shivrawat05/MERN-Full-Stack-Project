@@ -12,27 +12,190 @@ import { Button } from "@/components/ui/button";
 import { ArrowUpDownIcon } from "lucide-react";
 import { sortOptions } from "@/config";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAllFilteredProducts } from "@/store/shop/products-slice";
+import {
+  fetchAllFilteredProducts,
+  fetchProductDetails,
+} from "@/store/shop/products-slice";
 import ShoppingProductTile from "./product-tile";
+import { useSearchParams } from "react-router-dom";
+import ProductDetailsDialog from "./product-details";
 
 const ShoppingListing = () => {
-  const [filters, setFilters] = useState(null);
+  const [filters, setFilters] = useState({});
   const [sort, setSort] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
 
   const dispatch = useDispatch();
-  const { productList } = useSelector((state) => state.shopProducts);
+  const { productList, productDetails } = useSelector(
+    (state) => state.shopProducts,
+  );
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////
+  useEffect(() => {
+    if (filters && Object.keys(filters).length > 0) {
+      const createQueryString = createSearchParamsHelper(filters);
+      setSearchParams(new URLSearchParams(createQueryString));
+      dispatch(fetchAllFilteredProducts());
+    }
+  }, [filters]);
 
   useEffect(() => {
-    dispatch(fetchAllFilteredProducts());
-  }, [dispatch]);
+    if (filters !== null && sort !== null)
+      dispatch(
+        fetchAllFilteredProducts({ filterParams: filters, sortParams: sort }),
+      );
+  }, [dispatch, sort, filters]);
+
+  useEffect(() => {
+    if (productDetails !== null) setOpenDetailsDialog(true);
+  }, [productDetails]);
+
+  useEffect(() => {
+    setSort("price-lowtohigh");
+    setFilters(JSON.parse(sessionStorage.getItem("filters")) || {});
+  }, []);
 
   console.log("productList", productList);
 
+  function handleGetProductDetails(id) {
+    console.log("Product Id", id);
+    dispatch(fetchProductDetails(id));
+  }
+
+  console.log("Product Details fetched", productDetails);
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////
+  function createSearchParamsHelper(filterParams) {
+    // Defines a function that converts filter data into URL query parameters.
+
+    // Example input:
+
+    // {
+    //   category: ["mobile", "laptop"],
+    //   brand: ["apple"]
+    // }
+    const queryParams = [];
+    //     Creates an empty array to store query strings.
+
+    // Example later:
+
+    // [
+    //   "category=mobile,laptop",
+    //   "brand=apple"
+    // ]
+
+    for (const [key, value] of Object.entries(filterParams)) {
+      // Object.entries(filterParams);
+
+      // Converts object into key-value pairs.
+
+      // Example:
+
+      // {
+      //   category: ["mobile"],
+      //   brand: ["apple"]
+      // }
+
+      // becomes:
+
+      // [
+      //   ["category", ["mobile"]],
+      //   ["brand", ["apple"]]
+      // ]
+
+      if (Array.isArray(value) && value.length > 0) {
+        //         Checks:
+
+        // value is an array
+        // Array is not empty
+
+        // Example:
+
+        // ["mobile"]
+
+        // passes.
+        const paramValue = value.join(",");
+        // Converts array into comma-separated string.
+
+        // Example:
+
+        // ["mobile", "laptop"]
+
+        // becomes:
+
+        // "mobile,laptop"
+
+        queryParams.push(`${key}=${encodeURIComponent(paramValue)}`);
+        //         Creates a query parameter string.
+
+        // Example:
+
+        // category=mobile%2Claptop
+        // encodeURIComponent
+
+        // Encodes special characters safely for URLs.
+
+        // Example:
+
+        // comma , becomes %2C
+        // spaces become %20
+      }
+    }
+
+    console.log(queryParams, "queryParams");
+
+    return queryParams.join("&");
+    //     Joins all query params with &.
+
+    // Example:
+
+    // "category=mobile%2Claptop&brand=apple"
+
+    // This becomes the final query string.
+  }
+
+  function createSearchParamsHelper(filterParams) {
+    const queryParams = [];
+
+    for (const [key, value] of Object.entries(filterParams)) {
+      if (Array.isArray(value) && value.length > 0) {
+        const params = value.join(",");
+        queryParams.push(`${key}= ${encodeURIComponent(params)}`);
+      }
+    }
+
+    return queryParams.join("&");
+  }
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////
   const handleSort = (value) => {
     console.log("sort value", value);
     setSort(value);
   };
 
+  function handleFilter(getSectionId, getCurrentOption) {
+    let cpyFilters = { ...filters };
+    const indexOfCurrentSection = Object.keys(cpyFilters).indexOf(getSectionId);
+
+    if (indexOfCurrentSection === -1) {
+      cpyFilters = {
+        ...cpyFilters,
+        [getSectionId]: [getCurrentOption],
+      };
+    } else {
+      const indexOfCurrentOption =
+        cpyFilters[getSectionId].indexOf(getCurrentOption);
+
+      if (indexOfCurrentOption === -1)
+        cpyFilters[getSectionId].push(getCurrentOption);
+      else cpyFilters[getSectionId].splice(indexOfCurrentOption, 1);
+    }
+
+    setFilters(cpyFilters);
+    sessionStorage.setItem("filters", JSON.stringify(cpyFilters));
+  }
+
+  console.log("Filters", filters, searchParams);
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
   //fetch list of products
   return (
     <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 p-4 md:p-6">
@@ -76,12 +239,17 @@ const ShoppingListing = () => {
                 <ShoppingProductTile
                   handleGetProductDetails={handleGetProductDetails}
                   product={productItem}
-                  handleAddtoCart={handleAddtoCart}
+                  // handleAddtoCart={handleAddtoCart}
                 />
               ))
             : null}
         </div>
       </div>
+      <ProductDetailsDialog
+        open={openDetailsDialog}
+        setOpen={setOpenDetailsDialog}
+        productDetails={productDetails}
+      />
     </div>
   );
 };

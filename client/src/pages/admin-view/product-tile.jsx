@@ -2,7 +2,7 @@ import React from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-const AdminProductTile = ({ product, handleDelete, handleEdit }) => {
+const AdminProductTile = ({ product, handleEdit, handleDelete }) => {
   return (
     <Card className="w-full max-w-sm mx-auto">
       <div className="relative">
@@ -28,9 +28,23 @@ const AdminProductTile = ({ product, handleDelete, handleEdit }) => {
         </div>
       </CardContent>
       <CardFooter className="flex justify-between items-center">
-        <Button onClick={() => handleEdit(product)}>Edit</Button>{" "}
-        {/* ← pass whole product */}
-        <Button onClick={() => handleDelete(product?._id)}>Delete</Button>
+        <Button>View</Button>
+        <Button
+          onClick={() => {
+            handleEdit(product);
+            console.log("Edit product", product._id);
+          }}
+        >
+          Edit
+        </Button>
+        <Button
+          onClick={() => {
+            handleDelete(product);
+            console.log("Delete product", product._id);
+          }}
+        >
+          Delete
+        </Button>
       </CardFooter>
     </Card>
   );
