@@ -46,7 +46,7 @@ const AdminProducts = () => {
   const [currentEditedId, setCurrentEditedId] = useState(null);
 
   const dispatch = useDispatch();
-  const { productList } = useSelector((state) => state.shopProducts);
+  const { productList } = useSelector((state) => state.adminProducts);
 
   const {
     register,

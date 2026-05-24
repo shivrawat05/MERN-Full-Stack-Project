@@ -31,6 +31,7 @@ export const fetchAllProducts = createAsyncThunk(
 export const editProduct = createAsyncThunk(
   "/products/editproduct",
   async ({ id, formData }) => {
+    // {id, formData} it is used when there is need more tha one key
     const result = await axios.put(
       `http://localhost:5000/api/admin/products/edit/${id}`,
       formData,

@@ -19,6 +19,7 @@ import {
 import ShoppingProductTile from "./product-tile";
 import { useSearchParams } from "react-router-dom";
 import ProductDetailsDialog from "./product-details";
+import { addToCart, fetchCartItems } from "@/store/shop/cart-slice";
 
 const ShoppingListing = () => {
   const [filters, setFilters] = useState({});
@@ -27,9 +28,33 @@ const ShoppingListing = () => {
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
 
   const dispatch = useDispatch();
+
   const { productList, productDetails } = useSelector(
     (state) => state.shopProducts,
   );
+
+  const { user } = useSelector((state) => state.auth);
+
+  const { cartItems } = useSelector((state) => state.shopCart);
+
+  function handleAddToCart(getCurrentProductId) {
+    console.log(getCurrentProductId);
+    dispatch(
+      addToCart({
+        userId: user?.id,
+        productId: getCurrentProductId,
+        quantity: 1,
+      }),
+    ).then((result) => {
+      console.log(result);
+      if (result?.payload?.success) {
+        dispatch(fetchCartItems(user?.id));
+      }
+    });
+  }
+
+  console.log("Cart Iems", cartItems);
+
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
   useEffect(() => {
     if (filters && Object.keys(filters).length > 0) {
@@ -239,6 +264,7 @@ const ShoppingListing = () => {
                 <ShoppingProductTile
                   handleGetProductDetails={handleGetProductDetails}
                   product={productItem}
+                  handleAddToCart={handleAddToCart}
                   // handleAddtoCart={handleAddtoCart}
                 />
               ))

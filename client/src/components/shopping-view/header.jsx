@@ -32,12 +32,13 @@ import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
 import Popover from "@mui/material/Popover";
 import { logoutUser } from "@/store/auth-slice";
+import UserCartWrapper from "@/pages/shopping-view/cart-wrapper";
 
 const drawerWidth = 240;
-
 const navItems = ["Home", "Men", "Women", "Kids", "Footwear", "Accessories"];
 
 const ShoppingHeader = (props) => {
+  const [openCartSheet, setOpenCartSheet] = useState(false);
   const dispatch = useDispatch();
 
   const { window } = props;
@@ -190,9 +191,18 @@ const ShoppingHeader = (props) => {
               </Button>
             ))}
           </Box>
-          <IconButton sx={{ color: "text.primary" }}>
-            <LucideShoppingCart />
-          </IconButton>
+          <Sheet
+            open={openCartSheet}
+            onOpenChange={() => setOpenCartSheet(false)}
+          >
+            <IconButton
+              sx={{ color: "text.primary" }}
+              onClick={() => setOpenCartSheet(true)}
+            >
+              <LucideShoppingCart />
+              <UserCartWrapper />
+            </IconButton>
+          </Sheet>
 
           <Stack
             onClick={handleClick}
