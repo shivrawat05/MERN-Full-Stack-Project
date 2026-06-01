@@ -1,5 +1,5 @@
 import { Button } from "@mui/material";
-import { Minus, Plus } from "lucide-react";
+import { Minus, Plus, Trash } from "lucide-react";
 import React from "react";
 
 const UserCartItemsContent = ({ cartItem }) => {
@@ -40,6 +40,7 @@ const UserCartItemsContent = ({ cartItem }) => {
             cartItem?.quantity
           ).toFixed(2)}
         </p>
+        <Trash className="cursor-pointer mt-1" size={20} />
       </div>
     </div>
   );
