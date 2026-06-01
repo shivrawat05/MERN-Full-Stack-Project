@@ -35,9 +35,9 @@ const UserCartItemsContent = ({ cartItem }) => {
       <div className="flex flex-col items-end">
         <p className="font-semibold">
           $
-          {(cartItem?.salesPrice > 0
-            ? cartItem?.salesPrice
-            : cartItem?.price
+          {(
+            (cartItem?.salePrice > 0 ? cartItem?.salePrice : cartItem?.price) *
+            cartItem?.quantity
           ).toFixed(2)}
         </p>
       </div>
