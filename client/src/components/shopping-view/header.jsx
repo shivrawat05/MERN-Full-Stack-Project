@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   HousePlug,
@@ -33,6 +33,7 @@ import Stack from "@mui/material/Stack";
 import Popover from "@mui/material/Popover";
 import { logoutUser } from "@/store/auth-slice";
 import UserCartWrapper from "@/pages/shopping-view/cart-wrapper";
+import { fetchCartItems } from "@/store/shop/cart-slice";
 
 const drawerWidth = 240;
 const navItems = ["Home", "Men", "Women", "Kids", "Footwear", "Accessories"];
@@ -40,6 +41,12 @@ const navItems = ["Home", "Men", "Women", "Kids", "Footwear", "Accessories"];
 const ShoppingHeader = (props) => {
   const [openCartSheet, setOpenCartSheet] = useState(false);
   const dispatch = useDispatch();
+
+  const { user } = useSelector((state) => state.auth);
+  const { cartItems } = useSelector((state) => state.shopCart);
+
+  console.log(user);
+  console.log(cartItems, "Cart Items");
 
   const { window } = props;
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -51,6 +58,10 @@ const ShoppingHeader = (props) => {
       navigate("/");
     });
   };
+
+  useEffect(() => {
+    dispatch(fetchCartItems(user?.id));
+  }, [dispatch]);
 
   function stringToColor(string) {
     let hash = 0;
@@ -122,9 +133,6 @@ const ShoppingHeader = (props) => {
   const container =
     window !== undefined ? () => window().document.body : undefined;
 
-  const { isAuthenticated, user } = useSelector((state) => state.auth);
-  console.log(user);
-
   function stringAvatar(name) {
     const nameParts = name.split(" ");
     const initials =
@@ -191,19 +199,16 @@ const ShoppingHeader = (props) => {
               </Button>
             ))}
           </Box>
-          <Sheet
-            open={openCartSheet}
-            onOpenChange={() => setOpenCartSheet(false)}
-          >
+          <Sheet open={openCartSheet} onOpenChange={setOpenCartSheet}>
             <IconButton
               sx={{ color: "text.primary" }}
               onClick={() => setOpenCartSheet(true)}
             >
               <LucideShoppingCart />
-              <UserCartWrapper />
             </IconButton>
-          </Sheet>
 
+            <UserCartWrapper cartItems={cartItems} />
+          </Sheet>
           <Stack
             onClick={handleClick}
             className="ml-4"

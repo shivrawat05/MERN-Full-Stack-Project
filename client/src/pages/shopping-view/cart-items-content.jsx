@@ -1,7 +1,48 @@
+import { Button } from "@mui/material";
+import { Minus, Plus } from "lucide-react";
 import React from "react";
 
-const UserCartItemsContent = () => {
-  return <div>UserCartItemsContent</div>;
+const UserCartItemsContent = ({ cartItem }) => {
+  return (
+    <div className="flex items-center space-x-4-">
+      <img
+        src={cartItem?.image}
+        alt={cartItem?.title}
+        className="w-20 h-20 rounded object-cover"
+      />
+      <div className="flex-1">
+        <h3 className="font-extrabold">{cartItem?.title}</h3>
+        <div className="flex items-center gap-2 mt-1">
+          <Button
+            variant="outline"
+            className="h-8 w-8 rounded-full"
+            size="icon"
+          >
+            <Minus className="w-4 h-4" />
+            <span className="sr-only">Decrease</span>
+          </Button>
+          <span className="font-semibold">{cartItem?.quantity}</span>
+          <Button
+            variant="outline"
+            className="h-8 w-8 rounded-full"
+            size="icon"
+          >
+            <Plus className="w-4 h-4" />
+            <span className="sr-only">Increase</span>
+          </Button>
+        </div>
+      </div>
+      <div className="flex flex-col items-end">
+        <p className="font-semibold">
+          $
+          {(cartItem?.salesPrice > 0
+            ? cartItem?.salesPrice
+            : cartItem?.price
+          ).toFixed(2)}
+        </p>
+      </div>
+    </div>
+  );
 };
 
 export default UserCartItemsContent;
