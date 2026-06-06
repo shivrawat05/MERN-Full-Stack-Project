@@ -1,72 +1,61 @@
 import { StarIcon } from "lucide-react";
 // import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { useDispatch, useSelector } from "react-redux";
-// import { addToCart, fetchCartItems } from "@/store/shop/cart-slice";
+import { addToCart, fetchCartItems } from "@/store/shop/cart-slice";
 // import { useToast } from "@/components/ui/use-toast";
-import { setProductDetails } from "@/store/shop/products-slice";
+// import { setProductDetails } from "@/store/shop/products-slice";
 import { Label } from "@/components/ui/label";
 // import StarRatingComponent from "@/components/common/star-rating";
 import { useEffect, useState } from "react";
 // import { addReview, getReviews } from "@/store/shop/review-slice";
 
 function ProductDetailsDialog({ open, setOpen, productDetails }) {
+  //useState
   const [reviewMsg, setReviewMsg] = useState("");
   const [rating, setRating] = useState(0);
-  const dispatch = useDispatch();
+  //useState
+
   const { user } = useSelector((state) => state.auth);
   // const { cartItems } = useSelector((state) => state.shopCart);
+  //useSelector
+
+  const dispatch = useDispatch();
+
   // const { reviews } = useSelector((state) => state.shopReview);
 
   // const { toast } = useToast();
 
+  //function logic
   function handleRatingChange(getRating) {
     console.log(getRating, "getRating");
 
     setRating(getRating);
   }
 
-  function handleAddToCart(getCurrentProductId, getTotalStock) {
-    let getCartItems = cartItems.items || [];
-
-    if (getCartItems.length) {
-      const indexOfCurrentItem = getCartItems.findIndex(
-        (item) => item.productId === getCurrentProductId,
-      );
-      if (indexOfCurrentItem > -1) {
-        const getQuantity = getCartItems[indexOfCurrentItem].quantity;
-        if (getQuantity + 1 > getTotalStock) {
-          toast({
-            title: `Only ${getQuantity} quantity can be added for this item`,
-            variant: "destructive",
-          });
-
-          return;
-        }
+  function handleAddToCart(getCurrentProductId) {
+    console.log(getCurrentProductId);
+    dispatch(
+      addToCart({
+        userId: user?.id,
+        productId: getCurrentProductId,
+        quantity: 1,
+      }),
+    ).then((result) => {
+      console.log(result);
+      if (result?.payload?.success) {
+        dispatch(fetchCartItems(user?.id));
+        setOpen(false);
       }
-    }
-    // dispatch(
-    //   addToCart({
-    //     userId: user?.id,
-    //     productId: getCurrentProductId,
-    //     quantity: 1,
-    //   }),
-    // ).then((data) => {
-    //   if (data?.payload?.success) {
-    //     dispatch(fetchCartItems(user?.id));
-    //     toast({
-    //       title: "Product is added to cart",
-    //     });
-    //   }
-    // });
+    });
   }
 
   function handleDialogClose() {
     setOpen(false);
-    dispatch(setProductDetails());
+    // dispatch(setProductDetails());
     setRating(0);
     setReviewMsg("");
   }
@@ -104,9 +93,12 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
   //       reviews.length
   //     : 0;
 
+  //function logic
+
   return (
     <Dialog open={open} onOpenChange={handleDialogClose}>
       <DialogContent className="grid grid-cols-2 gap-8 sm:p-12 max-w-[90vw] sm:max-w-[80vw] lg:max-w-[70vw]">
+        <DialogTitle className="sr-only">Product Details</DialogTitle>
         <div className="relative overflow-hidden rounded-lg">
           <img
             src={productDetails?.image}
@@ -153,12 +145,7 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
             ) : (
               <Button
                 className="w-full"
-                onClick={() =>
-                  handleAddToCart(
-                    productDetails?._id,
-                    productDetails?.totalStock,
-                  )
-                }
+                onClick={() => handleAddToCart(productDetails?._id)}
               >
                 Add to Cart
               </Button>

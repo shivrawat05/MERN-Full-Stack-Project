@@ -21,6 +21,7 @@ import { useSearchParams } from "react-router-dom";
 import ProductDetailsDialog from "./product-details";
 import { addToCart, fetchCartItems } from "@/store/shop/cart-slice";
 
+
 const ShoppingListing = () => {
   const [filters, setFilters] = useState({});
   const [sort, setSort] = useState(null);
