@@ -21,7 +21,6 @@ import { useSearchParams } from "react-router-dom";
 import ProductDetailsDialog from "./product-details";
 import { addToCart, fetchCartItems } from "@/store/shop/cart-slice";
 
-
 const ShoppingListing = () => {
   const [filters, setFilters] = useState({});
   const [sort, setSort] = useState(null);
@@ -35,6 +34,8 @@ const ShoppingListing = () => {
   );
 
   const { user } = useSelector((state) => state.auth);
+
+  const categorySearchParam = searchParams.get("category");
 
   //function logic
   function handleAddToCart(getCurrentProductId) {
@@ -52,7 +53,6 @@ const ShoppingListing = () => {
       }
     });
   }
-
   //function logic
 
   //useEffect
@@ -60,7 +60,6 @@ const ShoppingListing = () => {
     if (filters && Object.keys(filters).length > 0) {
       const createQueryString = createSearchParamsHelper(filters);
       setSearchParams(new URLSearchParams(createQueryString));
-      dispatch(fetchAllFilteredProducts());
     }
   }, [filters]);
 
@@ -78,7 +77,7 @@ const ShoppingListing = () => {
   useEffect(() => {
     setSort("price-lowtohigh");
     setFilters(JSON.parse(sessionStorage.getItem("filters")) || {});
-  }, []);
+  }, [categorySearchParam]);
   //useEffect
 
   console.log("productList", productList);
@@ -180,18 +179,6 @@ const ShoppingListing = () => {
     // This becomes the final query string.
   }
 
-  function createSearchParamsHelper(filterParams) {
-    const queryParams = [];
-
-    for (const [key, value] of Object.entries(filterParams)) {
-      if (Array.isArray(value) && value.length > 0) {
-        const params = value.join(",");
-        queryParams.push(`${key}= ${encodeURIComponent(params)}`);
-      }
-    }
-
-    return queryParams.join("&");
-  }
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
   const handleSort = (value) => {
     console.log("sort value", value);

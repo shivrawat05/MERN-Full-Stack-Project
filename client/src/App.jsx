@@ -59,6 +59,7 @@ import NotFound from "./not-found";
 import ShoppingHome from "./pages/shopping-view/home";
 import ShoppingListing from "./pages/shopping-view/listing";
 import ShoppingCheckout from "./pages/shopping-view/checkout";
+import SearchProducts from "./pages/shopping-view/search";
 import ShoppingAccount from "./pages/shopping-view/account";
 import AdminLayout from "./components/admin-view/layout";
 import CheckAuth from "./components/common/check-auth";
@@ -67,6 +68,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { checkAuth } from "./store/auth-slice";
 import { Skeleton } from "./components/ui/skeleton";
+import PaypalReturnPage from "./pages/shopping-view/paypal-return";
+import PaymentSuccessPage from "./pages/shopping-view/payment-success";
 
 function App() {
   const { isAuthenticated, user, isLoading } = useSelector(
@@ -130,6 +133,9 @@ function App() {
           <Route path="listing" element={<ShoppingListing />} />
           <Route path="checkout" element={<ShoppingCheckout />} />
           <Route path="account" element={<ShoppingAccount />} />
+          <Route path="paypal-return" element={<PaypalReturnPage />} />
+          <Route path="payment-success" element={<PaymentSuccessPage />} />
+          <Route path="search" element={<SearchProducts />} />
         </Route>
         <Route path="*" element={<NotFound />} />
         <Route path="/unauth" element={<UnauthPage />} />

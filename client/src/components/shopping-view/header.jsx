@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import {
   HousePlug,
   LogOut,
@@ -39,7 +44,17 @@ const drawerWidth = 240;
 const navItems = ["Home", "Men", "Women", "Kids", "Footwear", "Accessories"];
 
 const ShoppingHeader = (props) => {
+  // useState logic
   const [openCartSheet, setOpenCartSheet] = useState(false);
+  const { window } = props;
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  // useState logic
+
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const { user } = useSelector((state) => state.auth);
@@ -48,20 +63,12 @@ const ShoppingHeader = (props) => {
   console.log(user);
   console.log(cartItems, "Cart Items");
 
-  const { window } = props;
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  const navigate = useNavigate();
-
+  //function logic
   const handleLogout = () => {
     dispatch(logoutUser()).then(() => {
       navigate("/");
     });
   };
-
-  useEffect(() => {
-    dispatch(fetchCartItems(user?.id));
-  }, [dispatch]);
 
   function stringToColor(string) {
     let hash = 0;
@@ -83,8 +90,6 @@ const ShoppingHeader = (props) => {
     return color;
   }
 
-  const [anchorEl, setAnchorEl] = React.useState(null);
-
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -92,9 +97,6 @@ const ShoppingHeader = (props) => {
   const handleClose = () => {
     setAnchorEl(null);
   };
-
-  const open = Boolean(anchorEl);
-  const id = open ? "simple-popover" : undefined;
 
   const handleDrawerToggle = () => {
     setMobileOpen((prevState) => !prevState);
@@ -147,6 +149,35 @@ const ShoppingHeader = (props) => {
       children: initials,
     };
   }
+
+  function handleNavigateIToListingPage(getCurrentMenuId) {
+    sessionStorage.removeItem("filters");
+    const currentFilter =
+      getCurrentMenuId.id !== "home"
+        ? {
+            category: [getCurrentMenuId.id],
+          }
+        : null;
+    sessionStorage.setItem("filters", JSON.stringify(currentFilter));
+
+    console.log("header category filter", currentFilter);
+
+    location.pathname.includes("listing") && currentFilter !== null
+      ? setSearchParams(new URLSearchParams(`?category=${getCurrentMenuId.id}`))
+      : navigate(getCurrentMenuId.path);
+  }
+
+  //function logic
+
+  // useEffect logic
+  useEffect(() => {
+    dispatch(fetchCartItems(user?.id));
+  }, [dispatch]);
+  // useEffect logic
+
+  const open = Boolean(anchorEl);
+  const id = open ? "simple-popover" : undefined;
+
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
@@ -194,7 +225,13 @@ const ShoppingHeader = (props) => {
             }}
           >
             {navItems.map((item) => (
-              <Button key={item} sx={{ color: "text.primary", mx: 1 }}>
+              <Button
+                onClick={() =>
+                  handleNavigateIToListingPage({ id: item.toLowerCase() })
+                }
+                key={item}
+                sx={{ color: "text.primary", mx: 1 }}
+              >
                 {item}
               </Button>
             ))}
@@ -207,7 +244,10 @@ const ShoppingHeader = (props) => {
               <LucideShoppingCart />
             </IconButton>
 
-            <UserCartWrapper cartItems={cartItems} />
+            <UserCartWrapper
+              cartItems={cartItems}
+              setOpenCartSheet={setOpenCartSheet}
+            />
           </Sheet>
           <Stack
             onClick={handleClick}

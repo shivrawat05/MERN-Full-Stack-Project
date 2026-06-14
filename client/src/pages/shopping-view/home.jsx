@@ -20,30 +20,20 @@ import {
   WashingMachine,
   WatchIcon,
 } from "lucide-react";
+import { useDispatch } from "react-redux";
+import {
+  fetchAllFilteredProducts,
+  fetchProductDetails,
+} from "@/store/shop/products-slice";
+import { useSelector } from "react-redux";
+import ShoppingProductTile from "./product-tile";
+import ProductDetailsDialog from "./product-details";
+import { useNavigate } from "react-router-dom";
+import { fetchCartItems } from "@/store/shop/cart-slice";
 
 const ShoppingHome = () => {
   const slides = [bannerOne, bannerTwo, bannerThree];
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      nextSlide();
-    }, 6000);
-
-    return () => clearInterval(timer);
-  }, [currentIndex]);
-
-  const prevSlide = () => {
-    const isFirst = currentIndex === 0;
-    const newIndex = isFirst ? slides.length - 1 : currentIndex - 1;
-    setCurrentIndex(newIndex);
-  };
-
-  const nextSlide = () => {
-    const isLast = currentIndex === slides.length - 1;
-    const newIndex = isLast ? 0 : currentIndex + 1;
-    setCurrentIndex(newIndex);
-  };
+  const navigate = useNavigate();
 
   const categoriesWithIcon = [
     { id: "men", label: "Men", icon: ShirtIcon },
@@ -61,16 +51,93 @@ const ShoppingHome = () => {
     { id: "zara", label: "Zara", icon: Images },
     { id: "h&m", label: "H&M", icon: Heater },
   ];
+
+  //use State Logic
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
+  //use State Logic
+
+  const dispatch = useDispatch();
+  const { productList, productDetails } = useSelector(
+    (state) => state.shopProducts,
+  );
+  console.log("Product List", productList);
+
+  //use Effect logic
+  useEffect(() => {
+    const timer = setInterval(() => {
+      nextSlide();
+    }, 6000);
+
+    return () => clearInterval(timer);
+  }, [currentIndex]);
+
+  useEffect(() => {
+    if (productDetails !== null) setOpenDetailsDialog(true);
+  }, [productDetails]);
+
+  useEffect(() => {
+    dispatch(
+      fetchAllFilteredProducts({
+        filterParams: {},
+        sortParams: "price-lowtohigh",
+      }),
+    );
+  }, [dispatch]);
+
+  console.log(productList, "productList");
+  //use Effect logic
+
+  //function logic
+  const prevSlide = () => {
+    const isFirst = currentIndex === 0;
+    const newIndex = isFirst ? slides.length - 1 : currentIndex - 1;
+    setCurrentIndex(newIndex);
+  };
+
+  const nextSlide = () => {
+    const isLast = currentIndex === slides.length - 1;
+    const newIndex = isLast ? 0 : currentIndex + 1;
+    setCurrentIndex(newIndex);
+  };
+
+  function handleNavigateToListingPage(getCurrentItem, section) {
+    sessionStorage.removeItem("filters");
+    const currentFilter = {
+      [section]: [getCurrentItem.id],
+    };
+
+    console.log("Current Filter", currentFilter);
+
+    sessionStorage.setItem("filters", JSON.stringify(currentFilter));
+    navigate(`/shop/listing`);
+  }
+
+  function handleGetProductDetails(getCurrentProductId) {
+    dispatch(fetchProductDetails(getCurrentProductId));
+  }
+
+  function handleAddtoCart(getCurrentProductId) {
+    dispatch(
+      addToCart({
+        userId: user?.id,
+        productId: getCurrentProductId,
+        quantity: 1,
+      }),
+    ).then((data) => {
+      if (data?.payload?.success) {
+        dispatch(fetchCartItems(user?.id));
+        toast({
+          title: "Product is added to cart",
+        });
+      }
+    });
+  }
+  //function logic
+
   return (
     <div className="flex flex-col min-h-screen">
       <div className="relative w-full h-[600px] overflow-hidden">
-        {/* {slides.map((slide, index) => (
-          <img
-            src={slide}
-            key={index}
-            className="absolute w-full h-full object-cover transition-opacity duration-500"
-          />
-        ))} */}
         <img src={slides[currentIndex]} alt="banner" />
       </div>
 
@@ -90,6 +157,25 @@ const ShoppingHome = () => {
       >
         <ChevronRightIcon className="w-4 h-4" />
       </Button>
+
+      <section className="py-12 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-8">Shop by Brand</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {brandsWithIcon.map((brandItem) => (
+              <Card
+                onClick={() => handleNavigateToListingPage(brandItem, "brand")}
+                className="cursor-pointer hover:shadow-lg transition-shadow"
+              >
+                <CardContent className="flex flex-col items-center justify-center p-6">
+                  <brandItem.icon className="w-12 h-12 mb-4 text-primary" />
+                  <span className="font-bold">{brandItem.label}</span>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <section className="py-12 bg-gray-50">
         <div className="container mx-auto px-4">
@@ -113,8 +199,47 @@ const ShoppingHome = () => {
           </div>
         </div>
       </section>
+
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-8">
+            Feature Products
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {productList && productList.length > 0
+              ? productList.map((productItem) => (
+                  <ShoppingProductTile
+                    handleGetProductDetails={handleGetProductDetails}
+                    product={productItem}
+                    handleAddtoCart={handleAddtoCart}
+                  />
+                ))
+              : null}
+          </div>
+        </div>
+      </section>
+      <ProductDetailsDialog
+        open={openDetailsDialog}
+        setOpen={setOpenDetailsDialog}
+        productDetails={productDetails}
+      />
     </div>
   );
 };
 
 export default ShoppingHome;
+// Component Mounts
+//        ↓
+// useEffect runs
+//        ↓
+// dispatch(fetchAllFilteredProducts())
+//        ↓
+// API Call
+//        ↓
+// Redux Store Updated
+//        ↓
+// useSelector gets updated data
+//        ↓
+// Component Re-renders
+//        ↓
+// productList contains products
