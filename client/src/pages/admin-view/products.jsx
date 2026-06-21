@@ -289,3 +289,17 @@ const AdminProducts = () => {
 };
 
 export default AdminProducts;
+
+// Component loads
+//       ↓
+// useEffect runs
+//       ↓
+// dispatch(getUsers())
+//       ↓
+// API call
+//       ↓
+// Redux store updated
+//       ↓
+// useSelector gets new users
+//       ↓
+// Component re-renders
